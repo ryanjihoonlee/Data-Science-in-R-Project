@@ -49,6 +49,7 @@ epl_data %>%
   labs(caption="Figure 1")+
   theme(plot.caption = element_text(hjust = 0.5))
 ```
+
 ```{r Red and Yellow Cards per Match, echo=FALSE, message=FALSE, fig.align='center'}
 ref_cards <- epl_data %>%
   group_by(Referee) %>%
@@ -72,12 +73,13 @@ ggplot(ref_cards, aes(Referee, red)) +
   labs(caption="Figure 3")+
   theme(plot.caption = element_text(hjust = 0.5))
 ```
+
 ```{r Manchester United Heat Map, echo=FALSE, message=FALSE, fig.align='center'}
-#  create a new dataframe with only the relevant columns
+#  Create a new dataframe with only the relevant columns
 card_data <- epl_data %>%
   select(HomeTeam, AwayTeam, Referee, HY, AY)
 
-# separate the data into two groups: cards given to the home team and cards given to the away team
+# Separate the data into two groups: cards given to the home team and cards given to the away team
 home_cards <- card_data %>%
   transmute(team = HomeTeam, opp_team = AwayTeam, cards = HY, Referee) %>%
   mutate(location = "home")
@@ -85,30 +87,30 @@ away_cards <- card_data %>%
   transmute(team = AwayTeam, opp_team = HomeTeam, cards = AY, Referee) %>%
   mutate(location = "away")
 
-# combine the two groups into a single dataframe
+# Combine the two groups into a single dataframe
 all_cards <- rbind(home_cards, away_cards)
 
-# create a new column for the total number of cards given to each team by each referee
+# Create a new column for the total number of cards given to each team by each referee
 all_cards <- all_cards %>%
   group_by(team, Referee) %>%
   summarize(total_cards = sum(cards)) %>%
   filter(!is.na(total_cards)) %>%
   ungroup()
 
-# create a new column for the total number of cards given to each team by all referees
+# Create a new column for the total number of cards given to each team by all referees
 team_totals <- all_cards %>%
   group_by(team) %>%
   summarize(total_cards = sum(total_cards)) %>%
   filter(!is.na(total_cards)) %>%
   ungroup()
 
-# calculate the percentage of cards given to the home team by each referee
+# Calculate the percentage of cards given to the home team by each referee
 card_percentages <- all_cards %>%
   left_join(team_totals, by = "team") %>%
   mutate(card_percentage = total_cards.x / total_cards.y) %>%
   select(-total_cards.x, -total_cards.y)
 
-# create a heat map for each home team
+# Create a heat map for each home team
 # teams <- unique(card_data$HomeTeam)
 x <- "Man United"
 team_cards <- card_percentages %>%
@@ -121,16 +123,14 @@ ggplot(team_cards, aes(x = reorder(Referee, -card_percentage), y = card_percenta
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   labs(caption="Figure 4")+
   theme(plot.caption = element_text(hjust = 0.5))
-
-
-
 ```
-```{r Yellow Card Breakdown, echo=FALSE, message=FALSE, fig.align='center'}
-# load data
+
+```{r Yellow Cards Breakdown, echo=FALSE, message=FALSE, fig.align='center'}
+# Load data
 card_data <- epl_data %>%
   select(HomeTeam, AwayTeam, Referee, HY, AY)
 
-# create separate dataframes for home and away cards
+# Create separate dataframes for home and away cards
 home_cards <- card_data %>%
   mutate(location = "home") %>%
   select(HomeTeam, Referee, HY, location) %>%
@@ -141,23 +141,23 @@ away_cards <- card_data %>%
   select(AwayTeam, Referee, AY, location) %>%
   rename(team = AwayTeam, cards = AY)
 
-# combine the dataframes
+# Combine the dataframes
 all_cards <- rbind(home_cards, away_cards)
 
-# calculate total cards for each team and each referee
+# Calculate total cards for each team and each referee
 team_totals <- all_cards %>%
   group_by(Referee, location) %>%
   summarize(total_cards = sum(cards) / n()) %>%
   filter(!is.na(total_cards)) %>%
   ungroup()
 
-# calculate percentage of cards for each team and each referee
+# Calculate percentage of cards for each team and each referee
 card_percentages <- team_totals %>%
   group_by(Referee, location) %>%
   summarize(card_percentage = mean(total_cards)) %>%
   ungroup()
 
-# plot yellow card percentages for home vs. away
+# Plot yellow card percentages for home vs. away
 ggplot(team_totals %>% group_by(Referee, location), aes(x = Referee, y = total_cards, fill = location)) +
   geom_bar(stat = "identity", position = "dodge") +
   scale_fill_manual(values = c("home" = "blue", "away" = "red")) +
@@ -166,16 +166,14 @@ ggplot(team_totals %>% group_by(Referee, location), aes(x = Referee, y = total_c
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   labs(caption="Figure 5")+
   theme(plot.caption = element_text(hjust = 0.5))
-
-
 ```
 
-```{r Red Card Breakdown, echo=FALSE, message=FALSE, fig.align='center'}
-# load data
+```{r Red Cards Breakdown, echo=FALSE, message=FALSE, fig.align='center'}
+# Load data
 card_data <- epl_data %>%
   select(HomeTeam, AwayTeam, Referee, HR, AR)
 
-# create separate dataframes for home and away cards
+# Create separate dataframes for home and away cards
 home_cards <- card_data %>%
   mutate(location = "home") %>%
   select(HomeTeam, Referee, HR, location) %>%
@@ -186,23 +184,23 @@ away_cards <- card_data %>%
   select(AwayTeam, Referee, AR, location) %>%
   rename(team = AwayTeam, cards = AR)
 
-# combine the dataframes
+# Combine the dataframes
 all_cards <- rbind(home_cards, away_cards)
 
-# calculate total cards for each team and each referee
+# Calculate total cards for each team and each referee
 team_totals <- all_cards %>%
   group_by(Referee, location) %>%
   summarize(total_cards = sum(cards) / n()) %>%
   filter(!is.na(total_cards)) %>%
   ungroup()
 
-# calculate percentage of cards for each team and each referee
+# Calculate percentage of cards for each team and each referee
 card_percentages <- team_totals %>%
   group_by(Referee, location) %>%
   summarize(card_percentage = mean(total_cards)) %>%
   ungroup()
 
-# plot yellow card percentages for home vs. away
+# Plot yellow card percentages for home vs. away
 ggplot(team_totals %>% group_by(Referee, location), aes(x = Referee, y = total_cards, fill = location)) +
   geom_bar(stat = "identity", position = "dodge") +
   scale_fill_manual(values = c("home" = "blue", "away" = "red")) +
@@ -211,9 +209,9 @@ ggplot(team_totals %>% group_by(Referee, location), aes(x = Referee, y = total_c
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   labs(caption="Figure 6")+
   theme(plot.caption = element_text(hjust = 0.5))
-
 ```
-```{r Foul Breakdown, echo=FALSE, message=FALSE, fig.align='center'}
+
+```{r Fouls Breakdown, echo=FALSE, message=FALSE, fig.align='center'}
 data <- epl_data %>%
   filter(!is.na(AY), !is.na(HY), !is.na(HF), !is.na(AF)) %>%
   group_by(Referee) %>%
@@ -228,7 +226,6 @@ ggplot(data, aes(x = Referee, y = Fouls, fill = Location)) +
   labs(caption="Figure 7")+
   theme(plot.caption = element_text(hjust = 0.5))
 ```
-
 
 ```{r Yellow Cards per Foul,echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
 # Step 3: Preprocess the data (updated)
@@ -251,7 +248,7 @@ ggplot(epl_data_processed, aes(x = Referee, y = Ratio, group = Referee)) +
 
 ## Question 1: Is there a difference between the number of fouls, yellow cards, and red cards booked against the Big 6 relative to other teams?
 
-```{r q1-stats, warning=FALSE, echo=FALSE, fig.align='center'}
+```{r Q1-Stats, warning=FALSE, echo=FALSE, fig.align='center'}
 # Count the number of fouls, yellow cards, and red cards booked against the Big 6 and Bad 6 teams
 big_6 <- c("Arsenal", "Chelsea", "Liverpool", "Man City", "Man United", "Tottenham")
 bad_6 <- c("Middlesbrough", "QPR", "Fulham", "Cardiff", "Wolves", "Huddersfield")
@@ -361,12 +358,9 @@ summary_table <- gt(summary_df) %>%
   cols_align(align = "left") # Set column alignment to "left"
 
 summary_table
-
 ```
 
-```{r big 6, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
-
-
+```{r Big 6, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
 # Define the big 6 Premier League teams
 big_6 <- c("Arsenal", "Chelsea", "Liverpool", "Man City", "Man United", "Tottenham")
 
@@ -400,14 +394,11 @@ ggplot(epl_data_bad_6, aes(x = Team, y = Ratio, fill = Team)) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   labs(caption="Figure 11")+
   theme(plot.caption = element_text(hjust = 0.5))
-
-
 ```
 
 ## Question 2: Which referees display bias towards certain teams?
 
-```{r q2 graphs yellow, echo=FALSE, message=FALSE, fig.align='center'}
- 
+```{r Q2-Graphs: Yellow Cards, echo=FALSE, message=FALSE, fig.align='center'}
 # Which referees display bias towards certain teams?
 # Create a new dataframe with only the relevant columns
 card_data <- epl_data %>%
@@ -459,12 +450,9 @@ final_plot <- ggdraw(combined_plot) +
   draw_label("Figure 12", x = 0.5, y = 0.025, hjust = 0.5, vjust = 0.5, size = 8)
 
 final_plot
-
-
 ```
 
-```{r q2 graphs red, warning=FALSE, echo=FALSE, message=FALSE, fig.align='center'}
-  
+```{r Q2-Graphs: Red Cards, warning=FALSE, echo=FALSE, message=FALSE, fig.align='center'}
 # Which referees display bias towards certain teams?
 # Create a new dataframe with only the relevant columns
 card_data <- epl_data %>%
@@ -517,11 +505,9 @@ final_plot <- ggdraw(combined_plot) +
   draw_label("Figure 13", x = 0.5, y = 0.025, hjust = 0.5, vjust = 0.5, size = 8)
 
 final_plot
-
 ```
 
-```{r q2 graphs fouls, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center'}
- 
+```{r Q2-Graphs: Fouls, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center'}
 # Which referees display bias towards certain teams?
 # Create a new dataframe with only the relevant columns
 card_data <- epl_data %>%
@@ -576,8 +562,7 @@ final_plot
 
 ## Question 3: Which teams are most likely to have fouls, yellow cards, and red cards booked against them?
 
-```{r q3 graphs, echo=FALSE, message=FALSE, fig.align='center'}
-
+```{r Q3-Graphs, echo=FALSE, message=FALSE, fig.align='center'}
 # add yellow_per_game and red_per_game to the data frame
 epl_data <- epl_data %>%
   group_by(HomeTeam) %>%
@@ -614,7 +599,6 @@ ggplot(epl_data, aes(x = reorder(HomeTeam, -red_per_game), y = red_per_game)) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   labs(caption="Figure 17")+
   theme(plot.caption = element_text(hjust = 0.5))
-
 ```
 
 # Discussion
